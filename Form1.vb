@@ -607,6 +607,11 @@ Public Class form1
 
 
 
+            'reset list of numbers that appear in the xml before reading it
+            For i As Integer = 0 To 1000
+                indesadoElNumero(i) = False
+            Next
+
             nodelist = documenetoxml.SelectNodes("/resultspage/results/result")
             For Each nodo In nodelist
                 k = k + 1
@@ -766,6 +771,17 @@ Public Class form1
 
                 'MsgBox(idimagen)
             Next
+
+            'hide any labels that didn't appear in the latest xml
+            For i As Integer = 1 To 1000
+                If asignadolabel(i) AndAlso indesadoElNumero(i) = False Then
+                    lblmoto(i).Visible = False
+                    lblmoto(i).Hide()
+                    asignadolabel(i) = False
+                    enpista(i) = False
+                End If
+            Next
+
             indice = k
             Exit Try
 
