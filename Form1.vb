@@ -660,6 +660,11 @@ Public Class form1
                     tiempo_de_vuelta(corredor_2) = TiempoultimavueltaTomada(corredor_2)
                     Tiempodeultimavueltatratada(corredor_2) = TiempoultimavueltaTomada(corredor_2)
 
+                    'Reset backcolor when receiving a fresh update
+                    If asignadolabel(corredor_2) Then
+                        lblmoto(corredor_2).BackColor = Color.GreenYellow
+                    End If
+
                     If tiempo_de_vuelta(corredor_2) = 0 Then tiempo_de_vuelta(corredor_2) = 120
 
 
