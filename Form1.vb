@@ -20,6 +20,8 @@ Public Class form1
     Dim HoraDePasoPorSector3(1000) As Double
     Dim HoraDelDiaActual(1000) As String
     Dim HoraDelDiaAnterior(1000) As String
+    'store when a rider was last seen in the xml
+    Dim HoraUltimaActualizacion(1000) As Double
     Dim tiempo_entre_marcas(1000) As Single
     Dim tiempo_de_vuelta(1000) As Single
     Dim tiemposector1(1000) As Double
@@ -156,6 +158,7 @@ Public Class form1
         For i As Integer = 0 To 1000
             enpista(i) = False
             indesadoElNumero(i) = False
+            HoraUltimaActualizacion(i) = 0
         Next
         indice = 0
         Label1.BackColor = Color.Magenta
@@ -607,6 +610,11 @@ Public Class form1
 
 
 
+            'reset list of numbers that appear in the xml before reading it
+            For i As Integer = 0 To 1000
+                indesadoElNumero(i) = False
+            Next
+
             nodelist = documenetoxml.SelectNodes("/resultspage/results/result")
             For Each nodo In nodelist
                 k = k + 1
@@ -638,6 +646,11 @@ Public Class form1
                 'milesimas = Val(Mid(ultimodato, p + 9, p + 11)) 'devuelve las milesimas  de la ultima vuelta.
                 segundos = minutos * 60 + segundos '+ milesimas / 1000   '
                 TiempoultimavueltaTomada(corredor_2) = segundos    'utilizamos la variable "corredor_2" como integer y no "(numeroDelIndice(k))" que string para poder mostrar el numero con algún carácter
+                'store moment of last update and remove stale red highlight
+                HoraUltimaActualizacion(corredor_2) = DateAndTime.Timer
+                If asignadolabel(corredor_2) Then
+                    lblmoto(corredor_2).BackColor = Color.GreenYellow
+                End If
                 ' If TiempoultimavueltaTomada(corredor_2) = 0 Then TiempoultimavueltaTomada(corredor_2) = 120
                 ' If TiempoultimavueltaTomada(corredor_2) = 0 Or TiempoultimavueltaTomada(corredor_2) > 150 Then TiempoultimavueltaTomada(corredor_2) = 120
 
@@ -659,6 +672,11 @@ Public Class form1
 
                     tiempo_de_vuelta(corredor_2) = TiempoultimavueltaTomada(corredor_2)
                     Tiempodeultimavueltatratada(corredor_2) = TiempoultimavueltaTomada(corredor_2)
+
+                    'Reset backcolor when receiving a fresh update
+                    If asignadolabel(corredor_2) Then
+                        lblmoto(corredor_2).BackColor = Color.GreenYellow
+                    End If
 
                     If tiempo_de_vuelta(corredor_2) = 0 Then tiempo_de_vuelta(corredor_2) = 120
 
@@ -750,7 +768,8 @@ Public Class form1
                 End If
 
 
-                If (HoraActual - (HoraDePasoPormeta(corredor_2) + tiempo_de_vuelta(corredor_2))) > 30 And enpista(corredor_2) Then '  And OtravezEnPista(corredor_2) = False Then
+                'remove label if no update has been seen for a while
+                If (HoraActual - HoraUltimaActualizacion(corredor_2)) > 30 And enpista(corredor_2) Then
                     enpista(corredor_2) = False
                     asignadolabel(corredor_2) = False
                     lblmoto(corredor_2).Visible = False
@@ -761,6 +780,17 @@ Public Class form1
 
                 'MsgBox(idimagen)
             Next
+
+            'hide any labels that didn't appear in the latest xml
+            For i As Integer = 1 To 1000
+                If asignadolabel(i) AndAlso (indesadoElNumero(i) = False Or (HoraActual - HoraUltimaActualizacion(i)) > 30) Then
+                    lblmoto(i).Visible = False
+                    lblmoto(i).Hide()
+                    asignadolabel(i) = False
+                    enpista(i) = False
+                End If
+            Next
+
             indice = k
             Exit Try
 
@@ -784,6 +814,7 @@ Public Class form1
             ultimavueltatratada(i) = -1
             HoraDelDiaAnterior(i) = "xx"
             HoraDelDiaActual(i) = ""
+            HoraUltimaActualizacion(i) = 0
             If asignadolabel(i) = True Then
                 lblmoto(i).Visible = False
                 lblmoto(i).Hide()
@@ -804,6 +835,7 @@ Public Class form1
         For j As Integer = 0 To 1000
             HoraDelDiaAnterior(j) = "xx"
             HoraDelDiaActual(j) = ""
+            HoraUltimaActualizacion(j) = 0
         Next
         Me.PictureBox1.Controls.Add(Me.Label6)   ' hace que el Label6 (cuenta Vueltas del primero) tenga el fondo transparente  coge el fondo del contenedor, el picturebox1
         Me.PictureBox1.Controls.Add(Me.Label7)
