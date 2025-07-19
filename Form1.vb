@@ -607,6 +607,11 @@ Public Class form1
 
 
 
+            'reset list of numbers that appear in the xml before reading it
+            For i As Integer = 0 To 1000
+                indesadoElNumero(i) = False
+            Next
+
             nodelist = documenetoxml.SelectNodes("/resultspage/results/result")
             For Each nodo In nodelist
                 k = k + 1
@@ -659,6 +664,11 @@ Public Class form1
 
                     tiempo_de_vuelta(corredor_2) = TiempoultimavueltaTomada(corredor_2)
                     Tiempodeultimavueltatratada(corredor_2) = TiempoultimavueltaTomada(corredor_2)
+
+                    'Reset backcolor when receiving a fresh update
+                    If asignadolabel(corredor_2) Then
+                        lblmoto(corredor_2).BackColor = Color.GreenYellow
+                    End If
 
                     If tiempo_de_vuelta(corredor_2) = 0 Then tiempo_de_vuelta(corredor_2) = 120
 
@@ -761,6 +771,17 @@ Public Class form1
 
                 'MsgBox(idimagen)
             Next
+
+            'hide any labels that didn't appear in the latest xml
+            For i As Integer = 1 To 1000
+                If asignadolabel(i) AndAlso indesadoElNumero(i) = False Then
+                    lblmoto(i).Visible = False
+                    lblmoto(i).Hide()
+                    asignadolabel(i) = False
+                    enpista(i) = False
+                End If
+            Next
+
             indice = k
             Exit Try
 
